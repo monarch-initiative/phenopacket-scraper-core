@@ -31,7 +31,6 @@ Now, install the application into the virtual environment.
 
 ::
 
-  (venv)$ cd pps
   (venv)$ python setup.py install
 
 Usage
