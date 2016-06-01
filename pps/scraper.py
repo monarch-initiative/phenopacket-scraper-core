@@ -22,15 +22,25 @@ class Scraper(Command):
         argx = sys.argv[1:]
         self.log.info('testing')
         self.log.debug('debugging')
+        
         option = str(parsed_args.url)
         self.log.info('Arguments: '+str(argx)+'\n')
         self.log.info(option+'\n')
-        r_ob = requests.get(option)
-        gaussian = BeautifulSoup(r_ob.content, "html.parser")
+        req_ob = requests.get(option)
+        
+        gaussian = BeautifulSoup(req_ob.content, "html.parser")
         abstract = gaussian.find_all("p", {"id": "p-2"})[0]
         self.app.stdout.write(str(abstract)+'\n\n\n\n\n\n')
         abs_text = abstract.text.encode('ascii','ignore')
         self.app.stdout.write(abs_text)
+
+        hpo_obs = gaussian.find_all("a", {"class": "kwd-search"})
+        self.app.stdout.write(str(hpo_obs)+'\n\n')
+        for ob in hpo_obs:
+            self.app.stdout.write(ob.text)
+            self.app.stdout.write('\n\n')
+
+
         # self.app.stdout.write(str(abstract.text).encode('ascii','ignore')+'\n\n\n\n\n\n')
 
         # self.app.stdout.write()
