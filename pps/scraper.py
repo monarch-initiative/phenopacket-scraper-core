@@ -1,8 +1,13 @@
+# encoding=utf8
+
 import logging
 import sys
 import requests
 from cliff.command import Command
 from bs4 import BeautifulSoup
+from html2text import html2text as gauss
+
+
 
 class Scraper(Command):
 
@@ -17,12 +22,24 @@ class Scraper(Command):
         argx = sys.argv[1:]
         self.log.info('testing')
         self.log.debug('debugging')
-        option = parsed_args.url
-        self.app.stdout.info('Arguments: '+str(argx)+'\n')
-        self.app.stdout.info(str(option)+'\n')
+        option = str(parsed_args.url)
+        self.log.info('Arguments: '+str(argx)+'\n')
+        self.log.info(option+'\n')
+        r_ob = requests.get(option)
+        gaussian = BeautifulSoup(r_ob.content, "html.parser")
+        abstract = gaussian.find_all("p", {"id": "p-2"})[0]
+        self.app.stdout.write(str(abstract)+'\n\n\n\n\n\n')
+        abs_text = abstract.text.encode('ascii','ignore')
+        self.app.stdout.write(abs_text)
+        # self.app.stdout.write(str(abstract.text).encode('ascii','ignore')+'\n\n\n\n\n\n')
+
+        # self.app.stdout.write()
+
+        # self.app.stdout.write(str(abstract.text)+'\n')
+        # self.app.stdout.write(str( gauss(   str(abstract.decode('utf-8'))   )) )
+        self.app.stdout.write(str( gauss(   str(abstract.text.decode('utf-8'))   )) )
 
 
-        # self.app.stdout.write(str(self.parsed_args))
 
 
 
