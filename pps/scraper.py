@@ -42,11 +42,12 @@ class Scraper(Command):
             abs_text = abstract.text.encode('ascii','ignore')
             self.app.stdout.write("Abstract:\n")
             # self.app.stdout.write(abs_text)
-            self.app.stdout.write(abs_text)
+            self.app.stdout.write(abs_text.decode('utf-8'))
+            self.app.stdout.write('\n')
 
             if parsed_args.output:
                 fopen = open( str(parsed_args.output) +'_abstract.txt','w')
-                fopen.write(abs_text)
+                fopen.write(abs_text + '\n')
                 fopen.close()
 
         except:
