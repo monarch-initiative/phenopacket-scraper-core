@@ -29,25 +29,23 @@ class Scraper(Command):
         req_ob = requests.get(option)
         
         gaussian = BeautifulSoup(req_ob.content, "html.parser")
+        title = gaussian.find_all("title")[0]
+        self.app.stdout.write("Title: " + str(title.text.decode('utf-8')) + "\n\n")
+
+        
         abstract = gaussian.find_all("p", {"id": "p-2"})[0]
-        self.app.stdout.write(str(abstract)+'\n\n\n\n\n\n')
         abs_text = abstract.text.encode('ascii','ignore')
+        self.app.stdout.write("Abstract:\n")
+        # self.app.stdout.write(abs_text)
         self.app.stdout.write(abs_text)
 
         hpo_obs = gaussian.find_all("a", {"class": "kwd-search"})
-        self.app.stdout.write(str(hpo_obs)+'\n\n')
+        # self.app.stdout.write(str(hpo_obs)+'\n\n')
+        self.app.stdout.write('HPO Terms:\n')
         for ob in hpo_obs:
             self.app.stdout.write(ob.text)
-            self.app.stdout.write('\n\n')
+            self.app.stdout.write('\n')
 
-
-        # self.app.stdout.write(str(abstract.text).encode('ascii','ignore')+'\n\n\n\n\n\n')
-
-        # self.app.stdout.write()
-
-        # self.app.stdout.write(str(abstract.text)+'\n')
-        # self.app.stdout.write(str( gauss(   str(abstract.decode('utf-8'))   )) )
-        self.app.stdout.write(str( gauss(   str(abstract.text.decode('utf-8'))   )) )
 
 
 
