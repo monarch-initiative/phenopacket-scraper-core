@@ -62,11 +62,33 @@ Example:
   Diffuse cerebellar atrophy
   Generalized hypotoni...
 
+
+To use files with list of URLs as input:
+
+::
+  
+  (venv)$ pps scrape -f (Filename)
+
+Example:
+
+::
+
+  (venv)$ pps scrape -f testurls.txt
+
+  testurls.txt:
+
+  http://molecularcasestudies.cshlp.org/content/early/2016/02/09/mcs.a000786.abstract
+  http://molecularcasestudies.cshlp.org/content/2/2/a000703.abstract
+  http://molecularcasestudies.cshlp.org/content/2/2/a000620.abstract
+  http://molecularcasestudies.cshlp.org/content/2/1/a000661.abstract
+
+
 To store the output in a file:
 
 ::
 
   (venv)$ pps scrape -u (Url) -o (Filename)
+  (venv)$ pps scrape -f (Input_filename) -o (Output_filename)
 
 This will create two files for now, (Filename)_abstract.txt will contain the abstract and the (Filename)_hpo_terms.txt will contain the hpo terms.
 
