@@ -37,7 +37,7 @@ setup(
     scripts=[],
 
     provides=[],
-    install_requires=['cliff'],
+    install_requires=['cliff','beautifulsoup4'],
 
     namespace_packages=[],
     packages=find_packages(),
@@ -48,7 +48,7 @@ setup(
             'pps = pps.main:main'
         ],
         'pps_commands': [
-            'test = pps.scraper:Scraper',
+            'scrape = pps.scraper:Scraper',
             'error = pps.scraper:Error',
         ],
     },
