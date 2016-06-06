@@ -20,12 +20,12 @@ class Scraper(Command):
         return parser
 
     def take_action(self, parsed_args):
-        argx = sys.argv[1:]
+        args = sys.argv[1:]
         self.log.info('testing')
         self.log.debug('debugging')
         
         option = str(parsed_args.url)
-        self.log.info('Arguments: '+str(argx)+'\n')
+        self.log.info('Arguments: '+ str(args) + '\n')
         self.log.info(option+'\n')
         req_ob = requests.get(option)
         
@@ -38,7 +38,7 @@ class Scraper(Command):
             pass
         
         try:        
-            abstract = gaussian.find_all("p", {"id": "p-2"})[0]
+            abstract = gaussian.find_all("p", {"id" : "p-2"})[0]
             abs_text = abstract.text.encode('ascii','ignore')
             self.app.stdout.write("Abstract:\n")
             # self.app.stdout.write(abs_text)
@@ -46,7 +46,7 @@ class Scraper(Command):
             self.app.stdout.write('\n')
 
             if parsed_args.output:
-                fopen = open( str(parsed_args.output) +'_abstract.txt','w')
+                fopen = open(str(parsed_args.output) + '_abstract.txt', 'w')
                 fopen.write(abs_text + '\n')
                 fopen.close()
 
@@ -64,7 +64,7 @@ class Scraper(Command):
                 # self.app.stdout.write('\n')
 
             if parsed_args.output:
-                fopen = open( str(parsed_args.output) +'_hpo_terms.txt','w')
+                fopen = open(str(parsed_args.output) + '_hpo_terms.txt', 'w')
                 for ob in hpo_obs:
                     fopen.write(ob.text + '\n')
 

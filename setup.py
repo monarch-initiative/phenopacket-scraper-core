@@ -37,7 +37,7 @@ setup(
     scripts=[],
 
     provides=[],
-    install_requires=['cliff','beautifulsoup4'],
+    install_requires=['cliff', 'beautifulsoup4', 'requests', 'html2text'],
 
     namespace_packages=[],
     packages=find_packages(),

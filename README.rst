@@ -22,7 +22,7 @@ First, you need to create a virtual environment and activate it.
 
 ::
 
-  $ sudo pip install virtualenv
+  $ [sudo] pip install virtualenv
   $ virtualenv venv
   $ source venv/bin/activate
   (venv)$ 
