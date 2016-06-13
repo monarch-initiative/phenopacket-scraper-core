@@ -159,8 +159,10 @@ class Annotate(Command):
         parser.add_argument('-o', '--output', type=str)
         return parser
 
+
     def take_action(self, parsed_args):
         args = sys.argv[1:]
+        
         self.log.info('Annotation Development')
         self.log.debug('debugging [Annotation]')
  
@@ -183,7 +185,20 @@ class Annotate(Command):
 
                 if response.status_code == 200:
                     annotated_data = response.json()
-                    self.app.stdout.write(str(annotated_data))          
+                    self.app.stdout.write(str(annotated_data))
+                    hpo_terms = []
+
+                    for ob in annotated_data:
+                        token = ob['token']
+                        if 'Phenotype' in token['categories']:
+                            term = str(token['terms'][0])
+                            if term not in hpo_terms:
+                                hpo_terms.append(token['terms'][0])
+
+                    self.app.stdout.write('\n HPO Terms:\n')
+                    for term in hpo_terms:
+                        self.app.stdout.write(str(term) + '\n')
+
                 else:
                     self.app.stdout.write(str(response.status_code))
 
