@@ -108,6 +108,14 @@ Sci-graph Annotation:
   increased carcinoma incidence
 
 
+To store the output in a file:
+
+::
+
+  (venv)$ pps annotate -u (Url) -o (Filename)
+
+This will create two files for now, (Filename)_annotated_data.txt will contain the annotated data and the (Filename)_hpo_terms.txt will contain the hpo terms extracted from the annotated data.
+
 
 Cleaning Up
 -----------

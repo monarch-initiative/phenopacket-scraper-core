@@ -188,6 +188,12 @@ class Annotate(Command):
                     self.app.stdout.write(str(annotated_data))
                     hpo_terms = []
 
+                    if parsed_args.output:
+                        fopen = open(str(parsed_args.output) + '_annotated_data.txt', 'w')
+                        fopen.write(str(annotated_data) + '\n')
+
+                        fopen.close()
+
                     for ob in annotated_data:
                         token = ob['token']
                         if 'Phenotype' in token['categories']:
@@ -198,6 +204,14 @@ class Annotate(Command):
                     self.app.stdout.write('\n HPO Terms:\n')
                     for term in hpo_terms:
                         self.app.stdout.write(str(term) + '\n')
+
+                    if parsed_args.output:
+                        fopen = open(str(parsed_args.output) + '_hpo_terms.txt', 'w' )
+                        fopen.write('HPO Terms:\n')
+                        for term in hpo_terms:
+                            fopen.write(str(term) + '\n')
+
+                        fopen.close()
 
                 else:
                     self.app.stdout.write(str(response.status_code))
