@@ -92,6 +92,23 @@ To store the output in a file:
 
 This will create two files for now, (Filename)_abstract.txt will contain the abstract and the (Filename)_hpo_terms.txt will contain the hpo terms.
 
+
+Sci-graph Annotation:
+
+::
+  
+  (venv)$ pps annotate -u (url)
+  
+  [{u'start': 4, u'token': {u'terms': [u'TORC1 complex'], u'id': u'GO:0031931', u'categories': [u'cellular component']}, u'end': 10}, {u'start': 11, u'token': {u'terms': [u'inhibitor'], u'id': u'CHEBI:35222', u'categories': [u'chemical role']}, u'end': 20}, {u'start': 72, u'token': {u'terms': [u'multiple'], u'id': u'PATO:0002118', u'categories': [u'qua......
+  
+  HPO Terms:
+  Neoplasm
+  Breast carcinoma
+  Carcinoma
+  increased carcinoma incidence
+
+
+
 Cleaning Up
 -----------
 
