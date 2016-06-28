@@ -49,6 +49,7 @@ setup(
         ],
         'pps_commands': [
             'scrape = pps.scraper:Scraper',
+            'annotate = pps.scraper:Annotate',            
             'error = pps.scraper:Error',
         ],
     },
