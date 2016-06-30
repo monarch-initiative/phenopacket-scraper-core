@@ -49,7 +49,8 @@ setup(
         ],
         'pps_commands': [
             'scrape = pps.scraper:Scraper',
-            'annotate = pps.scraper:Annotate',            
+            'annotate = pps.scraper:Annotate',
+            'phenopacket = pps.phenopacket:GenPhenoPacket',         
             'error = pps.scraper:Error',
         ],
     },
