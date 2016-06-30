@@ -133,12 +133,10 @@ class GenPhenoPacket(Command):
                     self.app.stdout.write(str(phenopacket))
 
 
-
-                    # if parsed_args.output:
-                    #     fopen = open(, 'w')
-                    #      fopen.write()
-
-                    #     fopen.close()
+                    if parsed_args.output:
+                        fopen = open(str(parsed_args.output)+ ".json", 'w')
+                        fopen.write(str(phenopacket))
+                        fopen.close()
                
                 else:
                     self.app.stdout.write("HPO Terms Not found")
