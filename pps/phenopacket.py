@@ -94,7 +94,14 @@ class GenPhenoPacket(Command):
                     onset = TemporalRegion()
                     offset = TemporalRegion()
 
+                    evidence_type = OntologyClass(
+                                                class_id="ECO:0000501",
+                                                label="Evidence used in automatic assertion")
+
+                    evidence = Evidence(types= [evidence_type])
+                    
                     phenotype_profile = []
+                    
                     for element in phenotype_data:
                         types_ob = OntologyClass(
                                                 class_id= element[0],
@@ -110,7 +117,7 @@ class GenPhenoPacket(Command):
 
                         phenotype_association   = PhenotypeAssociation(
                                                     entity = journal.id,
-                                                    evidence_list = [],     # Sequence[Evidence]=[],
+                                                    evidence_list = [evidence],     # Sequence[Evidence]=[],
                                                     # created = "!!date 2016 2 9"
                                                     phenotype = phenotype)
 
