@@ -141,7 +141,6 @@ class GenPhenoPacket(Command):
                 else:
                     self.app.stdout.write("HPO Terms Not found\n")
 
-
             except:
                 self.app.stdout.write("HPO Terms Not found\n")
 

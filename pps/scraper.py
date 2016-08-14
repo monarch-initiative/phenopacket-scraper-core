@@ -23,14 +23,10 @@ class Scraper(Command):
 
         parser = super(Scraper, self).get_parser(prog_name)
         parser.add_argument('-u', '--url', type=str)
-<<<<<<< HEAD
         parser.add_argument('-f', '--filename', type=str)
         parser.add_argument('-o', '--output', type=str)
         parser.add_argument('-d', '--doc', type=str)
-=======
-        parser.add_argument('-f', '--filename', type=str)   # File containing multiple URLS
-        parser.add_argument('-o', '--output', type=str)     # Save the output in a specified file
->>>>>>> 80ab57cdae3e10c658fecebc8fedd8f9cc6ca257
+
         return parser
 
     def take_action(self, parsed_args):
@@ -53,21 +49,12 @@ class Scraper(Command):
 
         if url:
             req_ob = requests.get(str(url).strip())
-<<<<<<< HEAD
-            
             soup = BeautifulSoup(req_ob.content, "html.parser")
             
             try:
                 title = soup.find_all("title")[0]
                 self.app.stdout.write("Title: " + str(title.text.decode('utf-8')) + "\n\n")
             
-=======
-            gaussian = BeautifulSoup(req_ob.content, "html.parser")        
- 
-            try:
-                title = gaussian.find_all("title")[0]
-                self.app.stdout.write("Title: " + str(title.text.decode('utf-8')) + "\n\n")          
->>>>>>> 80ab57cdae3e10c658fecebc8fedd8f9cc6ca257
             except:
                 pass
 
@@ -86,12 +73,7 @@ class Scraper(Command):
             except:
                 self.app.stdout.write("Abstract Not found\n")
 
-<<<<<<< HEAD
-
             hpo_obs = soup.find_all("a", {"class": "kwd-search"})
-=======
-            hpo_obs = gaussian.find_all("a", {"class": "kwd-search"})
->>>>>>> 80ab57cdae3e10c658fecebc8fedd8f9cc6ca257
 
             if hpo_obs:
                 # self.app.stdout.write(str(hpo_obs)+'\n\n')
@@ -169,13 +151,31 @@ class Scraper(Command):
         if doc:
             html_doc = open(str(doc), 'r')
             soup = BeautifulSoup(html_doc, 'html.parser')
-            self.app.stdout.write(soup.prettify())
+
+            try:
+                self.app.stdout.write('Title:' + str(soup.title.get_text()) + '\n')
+            except:
+                pass
+
+            try:
+                meta_list = soup.find_all('meta', {'name' : 'dc.Description'})
+                content_list= [k.get('content') for k in meta_list]
+                content = ' '.join(content_list)
+                self.app.stdout.write('Abstact:\n' + str(content)+'\n')
+                if parsed_args.output:
+                    fopen = open(str(parsed_args.output) + '_abstract.txt', 'w')
+                    fopen.write(content + '\n')
+                    fopen.close()
+            except:
+                self.app.stdout.write('Meta Data not Found')
+
 
 
 
 
 
 server_url = 'https://scigraph-ontology-dev.monarchinitiative.org/scigraph'
+
 
 class Annotate(Command):
     """
@@ -192,7 +192,6 @@ class Annotate(Command):
         """
         parser = super(Annotate, self).get_parser(prog_name)
         parser.add_argument('-u', '--url', type=str)
-        parser.add_argument('-f', '--filename', type=str)
         parser.add_argument('-o', '--output', type=str)
         return parser
 
@@ -210,15 +209,9 @@ class Annotate(Command):
         self.log.info('Arguments: '+ str(args) + '\n')
 
         if url:
-<<<<<<< HEAD
-
             req_ob = requests.get(str(url).strip())
-            
             soup = BeautifulSoup(req_ob.content, "html.parser")
-=======
-            req_ob = requests.get(str(url).strip())        
-            gaussian = BeautifulSoup(req_ob.content, "html.parser")
->>>>>>> 80ab57cdae3e10c658fecebc8fedd8f9cc6ca257
+
             
             try:        
                 abstract = soup.find_all("p", {"id" : "p-2"})[0]
