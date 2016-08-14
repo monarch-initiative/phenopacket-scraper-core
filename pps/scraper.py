@@ -167,7 +167,7 @@ class Scraper(Command):
                     fopen.write(content + '\n')
                     fopen.close()
             except:
-                self.app.stdout.write('Meta Data not Found')
+                self.app.stdout.write('Meta Data not Found\n')
 
 
 
@@ -192,6 +192,7 @@ class Annotate(Command):
         """
         parser = super(Annotate, self).get_parser(prog_name)
         parser.add_argument('-u', '--url', type=str)
+        parser.add_argument('-d', '--doc', type=str)
         parser.add_argument('-o', '--output', type=str)
         return parser
 
@@ -205,7 +206,9 @@ class Annotate(Command):
         args = sys.argv[1:]
         self.log.info('Annotation Development')
         self.log.debug('debugging [Annotation]')
+
         url = parsed_args.url
+        doc  = parsed_args.doc
         self.log.info('Arguments: '+ str(args) + '\n')
 
         if url:
@@ -216,6 +219,7 @@ class Annotate(Command):
             try:        
                 abstract = soup.find_all("p", {"id" : "p-2"})[0]
                 abs_text = abstract.text.encode('ascii','ignore')
+                self
                 data = {'content' : str(abs_text)}
 
                 response = requests.get(server_url + '/annotations/entities', params = data)
@@ -253,7 +257,58 @@ class Annotate(Command):
                     self.app.stdout.write(str(response.status_code))
             except:
                 self.app.stdout.write("Abstract Not found\n")
+     
+        if doc:
+            html_doc = open(str(doc), 'r')
+            soup = BeautifulSoup(html_doc, 'html.parser')
 
+            try:
+                self.app.stdout.write('Title:' + str(soup.title.get_text()) + '\n')
+            except:
+                pass
+
+            try:
+                meta_list = soup.find_all('meta', {'name' : 'dc.Description'})
+                content_list= [k.get('content') for k in meta_list]
+                content = ' '.join(content_list)
+                data = {'content' : str(content)}
+              
+                response = requests.get(server_url + '/annotations/entities', params = data)
+
+                if response.status_code == 200:
+                    annotated_data = response.json()
+                    self.app.stdout.write(str(annotated_data))
+                    hpo_terms = []
+
+                    if parsed_args.output:
+                        fopen = open(str(parsed_args.output) + '_annotated_data.txt', 'w')
+                        fopen.write(str(annotated_data) + '\n')
+
+                        fopen.close()
+
+                    for ob in annotated_data:
+                        token = ob['token']
+                        if 'Phenotype' in token['categories']:
+                            term = str(token['terms'][0])
+                            if term not in hpo_terms:
+                                hpo_terms.append(token['terms'][0])
+
+                    self.app.stdout.write('\n HPO Terms:\n')
+                    for term in hpo_terms:
+                        self.app.stdout.write(str(term) + '\n')
+
+                    if parsed_args.output:
+                        fopen = open(str(parsed_args.output) + '_hpo_terms.txt', 'w' )
+                        fopen.write('HPO Terms:\n')
+                        for term in hpo_terms:
+                            fopen.write(str(term) + '\n')
+
+                        fopen.close()
+                else:
+                    self.app.stdout.write(str(response.status_code))
+
+            except:
+                self.app.stdout.write('Meta Data not Found\n')
 
 
 class Error(Command):
