@@ -19,6 +19,7 @@ class Scraper(Command):
         parser.add_argument('-u', '--url', type=str)
         parser.add_argument('-f', '--filename', type=str)
         parser.add_argument('-o', '--output', type=str)
+        parser.add_argument('-d', '--doc', type=str)
         return parser
 
     def take_action(self, parsed_args):
@@ -28,6 +29,7 @@ class Scraper(Command):
  
         url = parsed_args.url
         fname = parsed_args.filename
+        doc = parsed_args.doc 
 
         self.log.info('Arguments: '+ str(args) + '\n')
 
@@ -38,17 +40,17 @@ class Scraper(Command):
 
             req_ob = requests.get(str(url).strip())
             
-            gaussian = BeautifulSoup(req_ob.content, "html.parser")
+            soup = BeautifulSoup(req_ob.content, "html.parser")
             
             try:
-                title = gaussian.find_all("title")[0]
+                title = soup.find_all("title")[0]
                 self.app.stdout.write("Title: " + str(title.text.decode('utf-8')) + "\n\n")
             
             except:
                 pass
             
             try:        
-                abstract = gaussian.find_all("p", {"id" : "p-2"})[0]
+                abstract = soup.find_all("p", {"id" : "p-2"})[0]
                 abs_text = abstract.text.encode('ascii','ignore')
                 self.app.stdout.write("Abstract:\n")
                 # self.app.stdout.write(abs_text)
@@ -64,7 +66,7 @@ class Scraper(Command):
                 self.app.stdout.write("Abstract Not found\n")
 
 
-            hpo_obs = gaussian.find_all("a", {"class": "kwd-search"})
+            hpo_obs = soup.find_all("a", {"class": "kwd-search"})
 
             if hpo_obs:
                 # self.app.stdout.write(str(hpo_obs)+'\n\n')
@@ -94,16 +96,16 @@ class Scraper(Command):
             while rline:
                 url = str(rline).strip()
                 req_ob = requests.get(url)
-                gaussian = BeautifulSoup(req_ob.content, "html.parser")
+                soup = BeautifulSoup(req_ob.content, "html.parser")
                  
                 try:
-                    title = gaussian.find_all("title")[0]
+                    title = soup.find_all("title")[0]
                     self.app.stdout.write("\nTitle: " + str(title.text.decode('utf-8')) + "\n\n")
                 except:
                     pass
                 
                 try:        
-                    abstract = gaussian.find_all("p", {"id" : "p-2"})[0]
+                    abstract = soup.find_all("p", {"id" : "p-2"})[0]
                     abs_text = abstract.text.encode('ascii','ignore')
                     self.app.stdout.write("Abstract:\n")
                     # self.app.stdout.write(abs_text)
@@ -119,7 +121,7 @@ class Scraper(Command):
                     self.app.stdout.write("Abstract Not found\n")
 
 
-                hpo_obs = gaussian.find_all("a", {"class": "kwd-search"})
+                hpo_obs = soup.find_all("a", {"class": "kwd-search"})
 
                 if hpo_obs:
                     # self.app.stdout.write(str(hpo_obs)+'\n\n')
@@ -141,6 +143,12 @@ class Scraper(Command):
                 rline = file_open.readline()
 
             file_open.close()
+
+        if doc:
+            html_doc = open(str(doc), 'r')
+            soup = BeautifulSoup(html_doc, 'html.parser')
+            self.app.stdout.write(soup.prettify())
+
 
 
 
@@ -174,10 +182,10 @@ class Annotate(Command):
 
             req_ob = requests.get(str(url).strip())
             
-            gaussian = BeautifulSoup(req_ob.content, "html.parser")
+            soup = BeautifulSoup(req_ob.content, "html.parser")
             
             try:        
-                abstract = gaussian.find_all("p", {"id" : "p-2"})[0]
+                abstract = soup.find_all("p", {"id" : "p-2"})[0]
                 abs_text = abstract.text.encode('ascii','ignore')
                 data = {'content' : str(abs_text)}
 

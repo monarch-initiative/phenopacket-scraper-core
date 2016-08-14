@@ -117,8 +117,7 @@ class GenPhenoPacket(Command):
 
                         phenotype_association   = PhenotypeAssociation(
                                                     entity = journal.id,
-                                                    evidence_list = [evidence],     # Sequence[Evidence]=[],
-                                                    # created = "!!date 2016 2 9"
+                                                    evidence_list = [evidence],                                                    
                                                     phenotype = phenotype)
 
                         phenotype_profile.append(phenotype_association)
@@ -139,7 +138,7 @@ class GenPhenoPacket(Command):
                         fopen.close()
                
                 else:
-                    self.app.stdout.write("HPO Terms Not found")
+                    self.app.stdout.write("HPO Terms Not found\n")
 
 
             except:
