@@ -83,11 +83,18 @@ Example:
   http://molecularcasestudies.cshlp.org/content/2/1/a000661.abstract
 
 
+To scrape required data from a HTML file:
+
+::
+
+  (venv)$ pps scrape -d (Filename)
+
 To store the output in a file:
 
 ::
 
   (venv)$ pps scrape -u (Url) -o (Filename)
+  (venv)$ pps scrape -d (Filename) -o (Filename)
   (venv)$ pps scrape -f (Input_filename) -o (Output_filename)
 
 This will create two files for now, (Filename)_abstract.txt will contain the abstract and the (Filename)_hpo_terms.txt will contain the hpo terms.
@@ -116,6 +123,12 @@ To store the output in a file:
 
 This will create two files for now, (Filename)_annotated_data.txt will contain the annotated data and the (Filename)_hpo_terms.txt will contain the hpo terms extracted from the annotated data.
 
+Phenopacket Generation:
+
+::
+
+  (venv)$ pps phenopacket -u (url)
+  (venv)$ pps phenopacket -d (html_filename)
 
 Cleaning Up
 -----------
