@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from phenopacket.PhenoPacket import *
 from phenopacket.models.Meta import *
 import json
+from test_data import test_annotated_data
 
 
 server_url = 'https://scigraph-ontology-dev.monarchinitiative.org/scigraph'
@@ -26,7 +27,77 @@ class GenPhenoPacket(Command):
         parser.add_argument('-u', '--url', type=str)
         parser.add_argument('-f', '--filename', type=str)
         parser.add_argument('-o', '--output', type=str)
+        parser.add_argument('-d', '--doc', type=str)
         return parser
+
+
+    def create_phenopacket(self, hpo_terms):
+        phenotype_data = []
+        for term in hpo_terms:
+            data={'content' : str(term)}
+            response = requests.get(server_url+ '/annotations/entities', params = data)
+            if response.status_code == 200:
+                annotated_data = response.json()
+                for ob in annotated_data:
+                    token = ob['token']
+                    token_term = str(token['terms'][0])
+                    if str(token_term).lower() == str(term).lower():
+                        term_id = token['id']                       #Taking The ID of the HPO term from Scigraph Annotator
+                        phenotype_data.append((term_id, term))
+            else:
+                self.app.stdout.write(str(response.status_code))
+
+    # Code to generate phenopacket below
+
+        self.app.stdout.write("\n" + str(phenotype_data) + "\n")
+        journal = Entity(
+                        id = str(url),
+                        type = EntityType.paper)
+
+        phenopacket_entities = [journal]
+
+        environment = Environment()
+        severity = ConditionSeverity()
+        onset = TemporalRegion()
+        offset = TemporalRegion()
+
+        evidence_type = OntologyClass(
+                                    class_id="ECO:0000501",
+                                    label="Evidence used in automatic assertion")
+
+        evidence = Evidence(types= [evidence_type])
+        
+        phenotype_profile = []
+        
+        for element in phenotype_data:
+            types_ob = OntologyClass(
+                                    class_id= element[0],
+                                    label= element[1])
+            types=[types_ob]
+
+            phenotype  =    Phenotype(
+                                types= types,
+                                environment=environment,
+                                severity=severity,
+                                onset=onset,
+                                offset=offset)
+
+            phenotype_association   = PhenotypeAssociation(
+                                        entity = journal.id,
+                                        evidence_list = [evidence],                                                    
+                                        phenotype = phenotype)
+
+            phenotype_profile.append(phenotype_association)
+
+
+        phenopacket = PhenoPacket(
+                            packet_id = "gauss-packet",
+                            title = title,
+                            entities = phenopacket_entities,
+                            phenotype_profile = phenotype_profile)
+        
+        return phenopacket
+
 
 
     def take_action(self, parsed_args):
@@ -43,6 +114,7 @@ class GenPhenoPacket(Command):
         self.log.info('Phenopacket Development')
         self.log.debug('debugging [GenPhenoPacket]')
         url = parsed_args.url
+        doc = parsed_args.doc
         self.log.info('Arguments: '+ str(args) + '\n')
 
         if url:
@@ -144,3 +216,43 @@ class GenPhenoPacket(Command):
             except:
                 self.app.stdout.write("HPO Terms Not found\n")
 
+        if doc:
+            html_doc = open(str(doc), 'r')
+            soup = BeautifulSoup(html_doc, 'html.parser')
+
+            try:
+                meta_list = soup.find_all('meta', {'name' : 'dc.Description'})
+                content_list= [k.get('content') for k in meta_list]
+                content = ' '.join(content_list)
+                data = {'content' : str(content)}
+              
+                response = requests.get(server_url + '/annotations/entities', params = data)
+
+                # Extracting Phenotypes using SciGraph Annotator
+                if response.status_code == 200:
+                    annotated_data = response.json()
+                    self.app.stdout.write(str(annotated_data))
+                    hpo_terms = []
+                    for ob in annotated_data:
+                        token = ob['token']
+                        if 'Phenotype' in token['categories']:
+                            term = str(token['terms'][0])
+                            if term not in hpo_terms:
+                                hpo_terms.append(token['terms'][0])
+
+                    self.app.stdout.write('\n HPO Terms:\n')
+                    for term in hpo_terms:
+                        self.app.stdout.write(str(term) + '\n')
+                else:
+                    self.app.stdout.write(str(response.status_code)+ '\n')
+                try:
+                    phenopacket = create_phenopacket(hpo_terms)
+                    self.app.stdout.write(str(phenopacket))
+                    if parsed_args.output:
+                        fopen = open(str(parsed_args.output)+ ".json", 'w')
+                        fopen.write(str(phenopacket))
+                        fopen.close()                                
+                except:
+                    pass
+            except:
+                self.app.stdout.write('Meta Data not Found\n')

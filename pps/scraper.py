@@ -305,7 +305,7 @@ class Annotate(Command):
 
                         fopen.close()
                 else:
-                    self.app.stdout.write(str(response.status_code))
+                    self.app.stdout.write(str(response.status_code)+ '\n')
 
             except:
                 self.app.stdout.write('Meta Data not Found\n')
