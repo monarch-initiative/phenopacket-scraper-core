@@ -5,8 +5,6 @@ import sys
 import requests
 from cliff.command import Command
 from bs4 import BeautifulSoup
-from html2text import html2text as gauss
-
 from phenopacket.PhenoPacket import *
 from phenopacket.models.Meta import *
 import json
@@ -14,13 +12,16 @@ import json
 
 server_url = 'https://scigraph-ontology-dev.monarchinitiative.org/scigraph'
 
-
-
 class GenPhenoPacket(Command):
 
     log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
+        """
+         The list of available parameters 
+         for `pps phenopacket` command.
+
+        """
         parser = super(GenPhenoPacket, self).get_parser(prog_name)
         parser.add_argument('-u', '--url', type=str)
         parser.add_argument('-f', '--filename', type=str)
@@ -29,34 +30,35 @@ class GenPhenoPacket(Command):
 
 
     def take_action(self, parsed_args):
-        args = sys.argv[1:]
-        
+        """
+        Takes a url, scrapes the HPO Terms,
+        annotates them using scigraph-annotator
+        to extract HPO Term ids.
+
+        Creates a phenopacket using phenopacket-
+        python. 
+
+        """
+        args = sys.argv[1:] 
         self.log.info('Phenopacket Development')
         self.log.debug('debugging [GenPhenoPacket]')
- 
         url = parsed_args.url
-
         self.log.info('Arguments: '+ str(args) + '\n')
 
         if url:
-
             req_ob = requests.get(str(url).strip())
             gaussian = BeautifulSoup(req_ob.content, "html.parser")
 
             try:
                 title = gaussian.find_all("title")[0]
                 title = str(title.text.decode('utf-8'))
-
             except:
                 title= ""
-            
 
             try:     
-
                 hpo_obs = gaussian.find_all("a", {"class": "kwd-search"})
 
                 if hpo_obs:
-
                     hpo_terms=[]
                     self.app.stdout.write('HPO Terms:\n')
 
@@ -74,12 +76,12 @@ class GenPhenoPacket(Command):
                                 token = ob['token']
                                 token_term = str(token['terms'][0])
                                 if str(token_term).lower() == str(term).lower():
-                                    term_id = token['id']
+                                    term_id = token['id']                       #Taking The ID of the HPO term from Scigraph Annotator
                                     phenotype_data.append((term_id, term))
                         else:
                             self.app.stdout.write(str(response.status_code))
 
-
+# Code to generate phenopacket below
 
                     self.app.stdout.write("\n" + str(phenotype_data) + "\n")
                     journal = Entity(
@@ -87,7 +89,6 @@ class GenPhenoPacket(Command):
                                     type = EntityType.paper)
 
                     phenopacket_entities = [journal]
-
 
                     environment = Environment()
                     severity = ConditionSeverity()

@@ -5,40 +5,55 @@ import sys
 import requests
 from cliff.command import Command
 from bs4 import BeautifulSoup
-from html2text import html2text as gauss
-
-
 
 
 class Scraper(Command):
+    """
+    Derived class for `pps scrape`
+    command.
+    """
 
     log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
+        """
+         The list of available parameters 
+         for `pps scrape` command.
+        """
+
         parser = super(Scraper, self).get_parser(prog_name)
         parser.add_argument('-u', '--url', type=str)
+<<<<<<< HEAD
         parser.add_argument('-f', '--filename', type=str)
         parser.add_argument('-o', '--output', type=str)
         parser.add_argument('-d', '--doc', type=str)
+=======
+        parser.add_argument('-f', '--filename', type=str)   # File containing multiple URLS
+        parser.add_argument('-o', '--output', type=str)     # Save the output in a specified file
+>>>>>>> 80ab57cdae3e10c658fecebc8fedd8f9cc6ca257
         return parser
 
     def take_action(self, parsed_args):
+        """
+        For each URL, scrapes the abstract  
+        and HPO Terms using BeautifulSoup and
+        produces them as output.
+        """
+
         args = sys.argv[1:]
         self.log.info('Development')
         self.log.debug('debugging')
- 
         url = parsed_args.url
         fname = parsed_args.filename
         doc = parsed_args.doc 
 
         self.log.info('Arguments: '+ str(args) + '\n')
 
-
-# Implementation of taking a URL as input
+    # Implementation of taking a URL as input
 
         if url:
-
             req_ob = requests.get(str(url).strip())
+<<<<<<< HEAD
             
             soup = BeautifulSoup(req_ob.content, "html.parser")
             
@@ -46,9 +61,16 @@ class Scraper(Command):
                 title = soup.find_all("title")[0]
                 self.app.stdout.write("Title: " + str(title.text.decode('utf-8')) + "\n\n")
             
+=======
+            gaussian = BeautifulSoup(req_ob.content, "html.parser")        
+ 
+            try:
+                title = gaussian.find_all("title")[0]
+                self.app.stdout.write("Title: " + str(title.text.decode('utf-8')) + "\n\n")          
+>>>>>>> 80ab57cdae3e10c658fecebc8fedd8f9cc6ca257
             except:
                 pass
-            
+
             try:        
                 abstract = soup.find_all("p", {"id" : "p-2"})[0]
                 abs_text = abstract.text.encode('ascii','ignore')
@@ -61,12 +83,15 @@ class Scraper(Command):
                     fopen = open(str(parsed_args.output) + '_abstract.txt', 'w')
                     fopen.write(abs_text + '\n')
                     fopen.close()
-
             except:
                 self.app.stdout.write("Abstract Not found\n")
 
+<<<<<<< HEAD
 
             hpo_obs = soup.find_all("a", {"class": "kwd-search"})
+=======
+            hpo_obs = gaussian.find_all("a", {"class": "kwd-search"})
+>>>>>>> 80ab57cdae3e10c658fecebc8fedd8f9cc6ca257
 
             if hpo_obs:
                 # self.app.stdout.write(str(hpo_obs)+'\n\n')
@@ -74,16 +99,13 @@ class Scraper(Command):
                 for ob in hpo_obs:
                     self.app.stdout.write(ob.text + '\n')
                     # self.app.stdout.write('\n')
-
                 if parsed_args.output:
                     fopen = open(str(parsed_args.output) + '_hpo_terms.txt', 'w')
                     for ob in hpo_obs:
                         fopen.write(ob.text + '\n')
-
                     fopen.close()
             else:
                 self.app.stdout.write("HPO Terms Not found")
-
 
 # Implementation of taking Input from files
 
@@ -152,15 +174,22 @@ class Scraper(Command):
 
 
 
+
 server_url = 'https://scigraph-ontology-dev.monarchinitiative.org/scigraph'
 
-
-
 class Annotate(Command):
+    """
+    Derived class for `pps annotate`
+    command.
+    """
 
     log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
+        """
+         The list of available parameters 
+         for `pps annotate` command.
+        """
         parser = super(Annotate, self).get_parser(prog_name)
         parser.add_argument('-u', '--url', type=str)
         parser.add_argument('-f', '--filename', type=str)
@@ -169,20 +198,27 @@ class Annotate(Command):
 
 
     def take_action(self, parsed_args):
+        """
+        Takes each url, scrapes the abstract
+        and HPO Terms and annotates them
+        using scigraph annotator.
+        """
         args = sys.argv[1:]
-        
         self.log.info('Annotation Development')
         self.log.debug('debugging [Annotation]')
- 
         url = parsed_args.url
-
         self.log.info('Arguments: '+ str(args) + '\n')
 
         if url:
+<<<<<<< HEAD
 
             req_ob = requests.get(str(url).strip())
             
             soup = BeautifulSoup(req_ob.content, "html.parser")
+=======
+            req_ob = requests.get(str(url).strip())        
+            gaussian = BeautifulSoup(req_ob.content, "html.parser")
+>>>>>>> 80ab57cdae3e10c658fecebc8fedd8f9cc6ca257
             
             try:        
                 abstract = soup.find_all("p", {"id" : "p-2"})[0]
@@ -220,18 +256,10 @@ class Annotate(Command):
                             fopen.write(str(term) + '\n')
 
                         fopen.close()
-
                 else:
                     self.app.stdout.write(str(response.status_code))
-
-
             except:
                 self.app.stdout.write("Abstract Not found\n")
-
-
-
-
-
 
 
 

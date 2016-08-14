@@ -76,9 +76,7 @@ class Phenopacketscraper(App):
             help='show tracebacks on errors',
         )
 
-
         return parser
-
 
 
     def prepare_to_run_command(self, cmd):
