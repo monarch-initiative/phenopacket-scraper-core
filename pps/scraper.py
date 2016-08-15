@@ -174,7 +174,7 @@ class Scraper(Command):
 
 
 
-server_url = 'https://scigraph-ontology-dev.monarchinitiative.org/scigraph'
+server_url = 'https://scigraph-ontology.monarchinitiative.org/scigraph'
 
 
 class Annotate(Command):
@@ -219,7 +219,6 @@ class Annotate(Command):
             try:        
                 abstract = soup.find_all("p", {"id" : "p-2"})[0]
                 abs_text = abstract.text.encode('ascii','ignore')
-                self
                 data = {'content' : str(abs_text)}
 
                 response = requests.get(server_url + '/annotations/entities', params = data)

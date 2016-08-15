@@ -8,10 +8,78 @@ from bs4 import BeautifulSoup
 from phenopacket.PhenoPacket import *
 from phenopacket.models.Meta import *
 import json
-from test_data import test_annotated_data
 
 
-server_url = 'https://scigraph-ontology-dev.monarchinitiative.org/scigraph'
+server_url = 'https://scigraph-ontology.monarchinitiative.org/scigraph'
+
+def gen_phenopacket(hpo_terms,url, title):
+    phenotype_data = []
+    print('Creating Phenopacket\n')
+    for term in hpo_terms:
+        data={'content' : str(term)}
+        response = requests.get(server_url+ '/annotations/entities', params = data)
+        if response.status_code == 200:
+            annotated_data = response.json()
+            for ob in annotated_data:
+                token = ob['token']
+                token_term = str(token['terms'][0])
+                if str(token_term).lower() == str(term).lower():
+                    term_id = token['id']                       #Taking The ID of the HPO term from Scigraph Annotator
+                    if term_id not in [k[0] for k in phenotype_data]:
+                        phenotype_data.append((term_id, term))
+        else:
+            print(str(response.status_code))
+
+# Code to generate phenopacket below
+
+    journal = Entity(
+                    id = str(url),
+                    type = EntityType.paper)
+    print('\n0.5\n')
+    phenopacket_entities = [journal]
+
+    environment = Environment()
+    severity = ConditionSeverity()
+    onset = TemporalRegion()
+    offset = TemporalRegion()
+
+    evidence_type = OntologyClass(
+                                class_id="ECO:0000501",
+                                label="Evidence used in automatic assertion")
+
+    evidence = Evidence(types= [evidence_type])
+
+    phenotype_profile = []
+    
+    for element in phenotype_data:
+        types_ob = OntologyClass(
+                                class_id= element[0],
+                                label= element[1])
+        types=[types_ob]
+
+        phenotype  =    Phenotype(
+                            types= types,
+                            environment=environment,
+                            severity=severity,
+                            onset=onset,
+                            offset=offset)
+
+        phenotype_association   = PhenotypeAssociation(
+                                    entity = journal.id,
+                                    evidence_list = [evidence],                                                    
+                                    phenotype = phenotype)
+
+        phenotype_profile.append(phenotype_association)
+
+    phenopacket = PhenoPacket(
+                        packet_id = "gauss-packet",
+                        title = title,
+                        entities = phenopacket_entities,
+                        phenotype_profile = phenotype_profile)
+
+    return phenopacket
+
+
 
 class GenPhenoPacket(Command):
 
@@ -84,7 +152,7 @@ class GenPhenoPacket(Command):
 
             phenotype_association   = PhenotypeAssociation(
                                         entity = journal.id,
-                                        evidence_list = [evidence],                                                    
+                                        evidence_list = [evidence],
                                         phenotype = phenotype)
 
             phenotype_profile.append(phenotype_association)
@@ -95,7 +163,8 @@ class GenPhenoPacket(Command):
                             title = title,
                             entities = phenopacket_entities,
                             phenotype_profile = phenotype_profile)
-        
+
+        self.app.stdout.write(str(phenopacket)) 
         return phenopacket
 
 
@@ -190,7 +259,7 @@ class GenPhenoPacket(Command):
 
                         phenotype_association   = PhenotypeAssociation(
                                                     entity = journal.id,
-                                                    evidence_list = [evidence],                                                    
+                                                    evidence_list = [evidence],
                                                     phenotype = phenotype)
 
                         phenotype_profile.append(phenotype_association)
@@ -219,7 +288,10 @@ class GenPhenoPacket(Command):
         if doc:
             html_doc = open(str(doc), 'r')
             soup = BeautifulSoup(html_doc, 'html.parser')
-
+            try:
+                title= str(soup.title.get_text())
+            except:
+                title=''
             try:
                 meta_list = soup.find_all('meta', {'name' : 'dc.Description'})
                 content_list= [k.get('content') for k in meta_list]
@@ -231,7 +303,7 @@ class GenPhenoPacket(Command):
                 # Extracting Phenotypes using SciGraph Annotator
                 if response.status_code == 200:
                     annotated_data = response.json()
-                    self.app.stdout.write(str(annotated_data))
+                    # self.app.stdout.write(str(annotated_data))
                     hpo_terms = []
                     for ob in annotated_data:
                         token = ob['token']
@@ -246,13 +318,13 @@ class GenPhenoPacket(Command):
                 else:
                     self.app.stdout.write(str(response.status_code)+ '\n')
                 try:
-                    phenopacket = create_phenopacket(hpo_terms)
+                    phenopacket = gen_phenopacket(hpo_terms,'Nejm Test', title)
                     self.app.stdout.write(str(phenopacket))
                     if parsed_args.output:
                         fopen = open(str(parsed_args.output)+ ".json", 'w')
                         fopen.write(str(phenopacket))
                         fopen.close()                                
                 except:
-                    pass
+                    self.app.stdout.write('Unable to create phenopacket\n')
             except:
                 self.app.stdout.write('Meta Data not Found\n')
