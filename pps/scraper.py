@@ -23,8 +23,10 @@ class Scraper(Command):
 
         parser = super(Scraper, self).get_parser(prog_name)
         parser.add_argument('-u', '--url', type=str)
-        parser.add_argument('-f', '--filename', type=str)   # File containing multiple URLS
-        parser.add_argument('-o', '--output', type=str)     # Save the output in a specified file
+        parser.add_argument('-f', '--filename', type=str)
+        parser.add_argument('-o', '--output', type=str)
+        parser.add_argument('-d', '--doc', type=str)
+
         return parser
 
     def take_action(self, parsed_args):
@@ -39,6 +41,7 @@ class Scraper(Command):
         self.log.debug('debugging')
         url = parsed_args.url
         fname = parsed_args.filename
+        doc = parsed_args.doc 
 
         self.log.info('Arguments: '+ str(args) + '\n')
 
@@ -46,16 +49,17 @@ class Scraper(Command):
 
         if url:
             req_ob = requests.get(str(url).strip())
-            gaussian = BeautifulSoup(req_ob.content, "html.parser")        
- 
+            soup = BeautifulSoup(req_ob.content, "html.parser")
+            
             try:
-                title = gaussian.find_all("title")[0]
-                self.app.stdout.write("Title: " + str(title.text.decode('utf-8')) + "\n\n")          
+                title = soup.find_all("title")[0]
+                self.app.stdout.write("Title: " + str(title.text.decode('utf-8')) + "\n\n")
+            
             except:
                 pass
 
             try:        
-                abstract = gaussian.find_all("p", {"id" : "p-2"})[0]
+                abstract = soup.find_all("p", {"id" : "p-2"})[0]
                 abs_text = abstract.text.encode('ascii','ignore')
                 self.app.stdout.write("Abstract:\n")
                 # self.app.stdout.write(abs_text)
@@ -69,7 +73,7 @@ class Scraper(Command):
             except:
                 self.app.stdout.write("Abstract Not found\n")
 
-            hpo_obs = gaussian.find_all("a", {"class": "kwd-search"})
+            hpo_obs = soup.find_all("a", {"class": "kwd-search"})
 
             if hpo_obs:
                 # self.app.stdout.write(str(hpo_obs)+'\n\n')
@@ -96,16 +100,16 @@ class Scraper(Command):
             while rline:
                 url = str(rline).strip()
                 req_ob = requests.get(url)
-                gaussian = BeautifulSoup(req_ob.content, "html.parser")
+                soup = BeautifulSoup(req_ob.content, "html.parser")
                  
                 try:
-                    title = gaussian.find_all("title")[0]
+                    title = soup.find_all("title")[0]
                     self.app.stdout.write("\nTitle: " + str(title.text.decode('utf-8')) + "\n\n")
                 except:
                     pass
                 
                 try:        
-                    abstract = gaussian.find_all("p", {"id" : "p-2"})[0]
+                    abstract = soup.find_all("p", {"id" : "p-2"})[0]
                     abs_text = abstract.text.encode('ascii','ignore')
                     self.app.stdout.write("Abstract:\n")
                     # self.app.stdout.write(abs_text)
@@ -121,7 +125,7 @@ class Scraper(Command):
                     self.app.stdout.write("Abstract Not found\n")
 
 
-                hpo_obs = gaussian.find_all("a", {"class": "kwd-search"})
+                hpo_obs = soup.find_all("a", {"class": "kwd-search"})
 
                 if hpo_obs:
                     # self.app.stdout.write(str(hpo_obs)+'\n\n')
@@ -144,10 +148,34 @@ class Scraper(Command):
 
             file_open.close()
 
+        if doc:
+            html_doc = open(str(doc), 'r')
+            soup = BeautifulSoup(html_doc, 'html.parser')
+
+            try:
+                self.app.stdout.write('Title:' + str(soup.title.get_text()) + '\n')
+            except:
+                pass
+
+            try:
+                meta_list = soup.find_all('meta', {'name' : 'dc.Description'})
+                content_list= [k.get('content') for k in meta_list]
+                content = ' '.join(content_list)
+                self.app.stdout.write('Abstact:\n' + str(content)+'\n')
+                if parsed_args.output:
+                    fopen = open(str(parsed_args.output) + '_abstract.txt', 'w')
+                    fopen.write(content + '\n')
+                    fopen.close()
+            except:
+                self.app.stdout.write('Meta Data not Found\n')
 
 
 
-server_url = 'https://scigraph-ontology-dev.monarchinitiative.org/scigraph'
+
+
+
+server_url = 'https://scigraph-ontology.monarchinitiative.org/scigraph'
+
 
 class Annotate(Command):
     """
@@ -164,7 +192,7 @@ class Annotate(Command):
         """
         parser = super(Annotate, self).get_parser(prog_name)
         parser.add_argument('-u', '--url', type=str)
-        parser.add_argument('-f', '--filename', type=str)
+        parser.add_argument('-d', '--doc', type=str)
         parser.add_argument('-o', '--output', type=str)
         return parser
 
@@ -178,15 +206,18 @@ class Annotate(Command):
         args = sys.argv[1:]
         self.log.info('Annotation Development')
         self.log.debug('debugging [Annotation]')
+
         url = parsed_args.url
+        doc  = parsed_args.doc
         self.log.info('Arguments: '+ str(args) + '\n')
 
         if url:
-            req_ob = requests.get(str(url).strip())        
-            gaussian = BeautifulSoup(req_ob.content, "html.parser")
+            req_ob = requests.get(str(url).strip())
+            soup = BeautifulSoup(req_ob.content, "html.parser")
+
             
             try:        
-                abstract = gaussian.find_all("p", {"id" : "p-2"})[0]
+                abstract = soup.find_all("p", {"id" : "p-2"})[0]
                 abs_text = abstract.text.encode('ascii','ignore')
                 data = {'content' : str(abs_text)}
 
@@ -225,7 +256,58 @@ class Annotate(Command):
                     self.app.stdout.write(str(response.status_code))
             except:
                 self.app.stdout.write("Abstract Not found\n")
+     
+        if doc:
+            html_doc = open(str(doc), 'r')
+            soup = BeautifulSoup(html_doc, 'html.parser')
 
+            try:
+                self.app.stdout.write('Title:' + str(soup.title.get_text()) + '\n')
+            except:
+                pass
+
+            try:
+                meta_list = soup.find_all('meta', {'name' : 'dc.Description'})
+                content_list= [k.get('content') for k in meta_list]
+                content = ' '.join(content_list)
+                data = {'content' : str(content)}
+              
+                response = requests.get(server_url + '/annotations/entities', params = data)
+
+                if response.status_code == 200:
+                    annotated_data = response.json()
+                    self.app.stdout.write(str(annotated_data))
+                    hpo_terms = []
+
+                    if parsed_args.output:
+                        fopen = open(str(parsed_args.output) + '_annotated_data.txt', 'w')
+                        fopen.write(str(annotated_data) + '\n')
+
+                        fopen.close()
+
+                    for ob in annotated_data:
+                        token = ob['token']
+                        if 'Phenotype' in token['categories']:
+                            term = str(token['terms'][0])
+                            if term not in hpo_terms:
+                                hpo_terms.append(token['terms'][0])
+
+                    self.app.stdout.write('\n HPO Terms:\n')
+                    for term in hpo_terms:
+                        self.app.stdout.write(str(term) + '\n')
+
+                    if parsed_args.output:
+                        fopen = open(str(parsed_args.output) + '_hpo_terms.txt', 'w' )
+                        fopen.write('HPO Terms:\n')
+                        for term in hpo_terms:
+                            fopen.write(str(term) + '\n')
+
+                        fopen.close()
+                else:
+                    self.app.stdout.write(str(response.status_code)+ '\n')
+
+            except:
+                self.app.stdout.write('Meta Data not Found\n')
 
 
 class Error(Command):
