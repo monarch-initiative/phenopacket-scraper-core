@@ -61,6 +61,7 @@ For Example:
 Now, install the application into the virtual environment.
 
 ::
+
   (venv)$ cd phenopacket-scraper-core
   (venv)$ python setup.py install
 

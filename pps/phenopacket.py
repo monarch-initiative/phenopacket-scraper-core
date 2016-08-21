@@ -31,7 +31,7 @@ def create_phenopacket(hpo_terms,url, title):
                 token_term = str(token['terms'][0])
                 if str(token_term).lower() == str(term).lower():
                     term_id = str(token['id'])                       #Taking The ID of the HPO term from Scigraph Annotator
-                    if term.lower() not in [str(k[0]) for k in phenotype_data]:
+                    if term_id not in [str(k[0]) for k in phenotype_data]:
                         phenotype_data.append((term_id, term))
         else:
             print(str(response.status_code))

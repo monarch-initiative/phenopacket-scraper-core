@@ -6,6 +6,10 @@ import requests
 from cliff.command import Command
 from bs4 import BeautifulSoup
 
+def trimlines(s):
+    lines = [line.strip() for line in s.splitlines()]
+    result = '\n'.join(lines)
+    return result
 
 class Scraper(Command):
     """
@@ -60,7 +64,7 @@ class Scraper(Command):
 
             try:        
                 abstract = soup.find_all("p", {"id" : "p-2"})[0]
-                abs_text = abstract.text.encode('ascii','ignore')
+                abs_text = trimlines(abstract.text).encode('ascii','ignore')
                 self.app.stdout.write("Abstract:\n")
                 # self.app.stdout.write(abs_text)
                 self.app.stdout.write(abs_text.decode('utf-8'))
@@ -110,7 +114,7 @@ class Scraper(Command):
                 
                 try:        
                     abstract = soup.find_all("p", {"id" : "p-2"})[0]
-                    abs_text = abstract.text.encode('ascii','ignore')
+                    abs_text = trimlines(abstract.text).encode('ascii','ignore')
                     self.app.stdout.write("Abstract:\n")
                     # self.app.stdout.write(abs_text)
                     self.app.stdout.write(abs_text.decode('utf-8'))
@@ -218,7 +222,7 @@ class Annotate(Command):
             
             try:        
                 abstract = soup.find_all("p", {"id" : "p-2"})[0]
-                abs_text = abstract.text.encode('ascii','ignore')
+                abs_text = trimlines(abstract.text).encode('ascii','ignore')
                 data = {'content' : str(abs_text)}
 
                 response = requests.get(server_url + '/annotations/entities', params = data)
