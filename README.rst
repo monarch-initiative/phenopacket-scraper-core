@@ -23,7 +23,7 @@ First, you need to create a virtual environment and activate it.
 ::
 
   $ [sudo] pip install virtualenv
-  $ virtualenv venv
+  $ virtualenv -p python3 venv
   $ source venv/bin/activate
   (venv)$ 
 
@@ -33,10 +33,35 @@ Next, install all the dependencies in the environment.
 
   (venv)$ venv/bin/pip install -r requirements.txt
 
-Now, install the application into the virtual environment.
+Clone the phenopacket-python repository:
 
 ::
 
+  $ git clone https://github.com/phenopackets/phenopacket-python.git
+
+Install it in your virtual environment:
+
+::
+
+  (venv)$ cd phenopacket-python
+  (venv)$ python setup.py install
+
+Add this to the end of ~/.profile or ~/.bash_profile file to add phenopacket-python directory to your python environment variables:
+
+::
+
+  $ export PYTHONPATH=$PYTHONPATH:[path of phenopacket-python directory]
+
+For Example:
+
+::
+
+  $ export PYTHONPATH=$PYTHONPATH:/Users/Gauss/Home/phenopacket-python
+
+Now, install the application into the virtual environment.
+
+::
+  (venv)$ cd phenopacket-scraper-core
   (venv)$ python setup.py install
 
 Usage
@@ -114,21 +139,34 @@ Sci-graph Annotation:
   Carcinoma
   increased carcinoma incidence
 
-
-To store the output in a file:
-
-::
-
-  (venv)$ pps annotate -u (Url) -o (Filename)
-
-This will create two files for now, (Filename)_annotated_data.txt will contain the annotated data and the (Filename)_hpo_terms.txt will contain the hpo terms extracted from the annotated data.
-
 Phenopacket Generation:
 
 ::
 
   (venv)$ pps phenopacket -u (url)
   (venv)$ pps phenopacket -d (html_filename)
+
+  {
+  "entities": [
+    {
+      "id": "http://molecularcasestudies.cshlp.org/content/2/1/a000661.abstract",
+      "type": "paper"
+    }
+  ],
+  "id": "gauss-packet",
+  "phenotype_profile": [
+    {.....
+
+
+To store the output in a file:
+
+::
+
+  (venv)$ pps annotate -u (Url) -o (Filename)
+  (venv)$ pps phenopacket -u (Url) -o (Filename)
+
+
+
 
 Cleaning Up
 -----------
