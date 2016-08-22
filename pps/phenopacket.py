@@ -13,6 +13,12 @@ import json
 server_url = 'https://scigraph-ontology.monarchinitiative.org/scigraph'
 
 def create_phenopacket(hpo_terms,url, title):
+    """
+    Takes HPO terms, url and title
+    and generates a PhenoPacket
+    Uses Scigraph to collect ids
+    of HPO terms.
+    """
     phenotype_data = []
     print('Creating Phenopacket\n')
     for term in hpo_terms:
@@ -24,8 +30,8 @@ def create_phenopacket(hpo_terms,url, title):
                 token = ob['token']
                 token_term = str(token['terms'][0])
                 if str(token_term).lower() == str(term).lower():
-                    term_id = token['id']                       #Taking The ID of the HPO term from Scigraph Annotator
-                    if term_id not in [k[0] for k in phenotype_data]:
+                    term_id = str(token['id'])                       #Taking The ID of the HPO term from Scigraph Annotator
+                    if term_id not in [str(k[0]) for k in phenotype_data]:
                         phenotype_data.append((term_id, term))
         else:
             print(str(response.status_code))
@@ -35,7 +41,7 @@ def create_phenopacket(hpo_terms,url, title):
     journal = Entity(
                     id = str(url),
                     type = EntityType.paper)
-    print('\n0.5\n')
+
     phenopacket_entities = [journal]
 
     environment = Environment()
@@ -101,8 +107,8 @@ class GenPhenoPacket(Command):
 
     def take_action(self, parsed_args):
         """
-        Takes a url, scrapes the HPO Terms,
-        annotates them using scigraph-annotator
+        Takes a url or a file, scrapes the HPO 
+        Terms, annotates them using scigraph-annotator
         to extract HPO Term ids.
 
         Creates a phenopacket using phenopacket-
